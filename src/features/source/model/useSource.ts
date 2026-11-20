@@ -1,4 +1,6 @@
 import { ref } from "vue";
+import { fullCrop } from "../../../shared/defaults";
+import { clearWarpCache } from "../../crop/lib/warp";
 import { useStudio } from "../../../shared/useStudio";
 import { decodeImage } from "../lib/decode";
 import { demoImage } from "../lib/demo";
@@ -12,8 +14,9 @@ export function useSource() {
     try {
       const asset = await decodeImage(url, name);
       if (id !== ticket) return;
+      if (doc.asset) clearWarpCache(doc.asset);
       doc.asset = asset;
-      doc.crop = { x: 0, y: 0, width: 1, height: 1 };
+      doc.crop = fullCrop();
       invalidate();
       notice.value = "图片已载入";
     } catch (e) {

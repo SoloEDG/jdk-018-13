@@ -6,7 +6,7 @@ import { gridRows } from "../lib/rows";
 import ArtCanvas from "./ArtCanvas.vue";
 const p = usePreview();
 const text = computed(() =>
-  p.doc.grid ? gridRows(p.doc.grid).join("\n") : "",
+  p.shown.value ? gridRows(p.shown.value).join("\n") : "",
 );
 </script>
 <template>
@@ -33,17 +33,20 @@ const text = computed(() =>
       /></label>
     </div>
     <div class="art-stage">
-      <div class="stage-label">OUTPUT / LIVE RENDER <span>●</span></div>
+      <div class="stage-label">
+        OUTPUT / LIVE RENDER
+        <span>{{ p.drafting.value ? "◌ 拖动预览（降质）" : "●" }}</span>
+      </div>
       <div class="art-scroll">
         <ArtCanvas
-          v-if="p.doc.grid && p.mode.value === 'art'"
-          :grid="p.doc.grid"
+          v-if="p.shown.value && p.mode.value === 'art'"
+          :grid="p.shown.value"
           :color="p.doc.settings.color"
           :background="p.doc.settings.background"
           :zoom="p.zoom.value"
         />
         <pre
-          v-else-if="p.doc.grid"
+          v-else-if="p.shown.value"
           data-testid="text-preview"
           :style="{
             fontSize: (14 * p.zoom.value) / 100 + 'px',
@@ -53,17 +56,19 @@ const text = computed(() =>
         <span v-else>正在准备字符画…</span>
       </div>
       <div class="stage-corner">
-        {{ p.doc.grid?.columns }} COL × {{ p.doc.grid?.rows }} ROW
+        {{ p.shown.value?.columns }} COL × {{ p.shown.value?.rows }} ROW
       </div>
     </div>
     <div class="preview-bottom">
       <span class="mono"
         ><i class="status-dot" />{{
-          p.busy.value
-            ? "生成中"
-            : p.doc.grid?.revision === p.doc.revision
-              ? "已同步"
-              : "待重新生成"
+          p.drafting.value
+            ? "拖动预览 · 降质"
+            : p.busy.value
+              ? "生成中"
+              : p.doc.grid?.revision === p.doc.revision
+                ? "已同步"
+                : "待重新生成"
         }}
         <span class="muted">/ {{ p.count.value }} 个字符</span></span
       >
